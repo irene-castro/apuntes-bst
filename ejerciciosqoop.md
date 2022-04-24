@@ -35,4 +35,51 @@
       
 
 ### Creación de la tabla en Hive
+
+Creamos la tabla en hive donde se importarán los datos que acabamos de crear
+
+1. Accedemos a hive.
+
+   `hive`
+   
+2. Creamos una base de datos para esta prueba y accedemos a ella.
+
+   `CREATE DATABASE pruebahsq;`
+   
+   `USE pruebahsq;`
+   
+3. Comprobamos que está en el warehouse de hive (NOTA: Para ello debemos abrir otra terminal en la MV)
+
+   `hadoop fs -ls /user/hive/warehouse`
+
+4. Creamos la estructura de la table que contendrá los datos importados desde mysql con sqoop.
+
+   `CREATE TABLE tabhsq (nombre string, edad int) ROW FORMAT DELIMITED STORED AS TEXTFILE;`
+
+5. Comprobamos que se ha creado con éxito.
+
+   `SHOW TABLES`
+   
+   
+### Importamos la tabla a Sqoop
+
+1. Dado que la “bbdd” Accumulo no está configurada, abrimos un Shell y ejecutamos los siguientes comandos para evitar warnings molestos.
+
+   `sudo mkdir /var/lib/accumulo`
+   
+   `ACCUMULO_HOME= '/var/lib/accumulo'`
+   
+   `export ACCUMULO_HOME` 
+   
+2. En un Shell escribimos lo siguiente para ver que sqoop está conectado con nuestro mysql:
+
+   `sqoop list-databases --connect jdbc:mysql://localhost --username root --password cloudera`
+   
+3. Ahora listamos la tabla “table_prueba” de la bbdd “pruebadb” que hemos creado en MySQL.
+
+   `sqoop list-tables --connect jdbc:mysql://localhost/pruebadb --username root --password cloudera`
+   
+4. Usando los argumentos de importación hive mostrados en las slides del curso, importar la tabla creada en Mysql en la estructura creada en hive. Usar como conector (jdbc:mysql://localhost/bbddMysql) y un solo mapper.
+
+   `sqoop import --connect jdbc:mysql://localhost/pruebadb --table tabla_prueba --username root --password cloudera -m 1 --hive-import --hive-overwrite --hive-table pruebahsq.tabhsq`
   
