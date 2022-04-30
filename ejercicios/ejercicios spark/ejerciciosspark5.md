@@ -68,7 +68,7 @@ columnas: id INT, name STRING, age INT\
 config table: FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n'.
 ```
 import org.apache.spark.sql.hive.HiveContext
-var sscc=new.HiveContext(sc)
+var sscc=new HiveContext(sc)
 sscc.sql("CREATE DATABASE hivespark IF NOT EXISTS")
 sscc.sql("USE hivespark")
 sscc.sql("CREATE TABLE hivespark.empleados(id AS INT, name AS STRING, age AS INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n'")
