@@ -33,12 +33,20 @@ Accedemos a https:/spark.apache.org/ y descargamos la versión 3.0.3 (Jun 23 202
 Creamos la ruta C:/Spark y descomprimimos la descarga en ella. Ahora, en el GitHub https://github.com/steveloughran/winutils descargamos la carpeta hadoop-2.7.1
 y la llevaremos a la ruta C:/Hadoop.
 
+Creamos dos variables de entorno nuevas, SPARK_HOME y HADOOP_HOME, con los path a sus bin. 
 
+#### Scala y Python desde la consola
 
+En la consola de Anaconda, 
+```
+- pyspark 
+- spark-shell
+- pip install pyspark
+```
 
+También añadimos las variables de entorno (esta vez de usuario) PYSPARK_DRIVER_PYTHON (val: jupyter), PYSPARK_DRIVER_PYTHON_OPTS (val:notebook) y haciendo pyspark en Anaconda nos abrirá un notebook de jupyter.
 
+#### Scala desde Jupyter Notebook
 
-
-
-
+Abrimos la consola de Anaconda y ejecutamos *pip install spylon-kernel*.
 
