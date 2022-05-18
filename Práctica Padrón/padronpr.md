@@ -173,6 +173,7 @@ conclusión?
 
 3.8) ¿Se percibe alguna diferencia de rendimiento entre Hive e Impala?
 ```
+Impala es hasta 5 veces más rapido que Hive, tiene una latencia mucho menor.
 ```
 
 
