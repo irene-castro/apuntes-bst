@@ -4,26 +4,64 @@ A partir de los datos (CSV) de Padrón de Madrid llevamos acabo los siguientes e
 
 ## _Hive_ ##
 
+_Nota: Para abrir Hive, iniciamos la máquina virtual de Cloudera. Una vez hecho, abrimos Hue en el navegador, en el cual ya 
+podremos iniciar la consulta Hive que queramos._
+
 ## 1. Creación de tablas en formato texto ##
 
 1.1) Crear base de datos "datos_padron" 
 ```
+CREATE DATABASE datos_padron
 ```
 
-1.2) Crear la tabla de datos padron_txt con todos los campos del fichero CSV y cargar los datos mediante el comando LOAD DATA LOCAL INPATH. La tabla tendrá formato 
-texto y tendrá como delimitador de campo el caracter ';' y los campos que en el 
-documento original están encerrados en comillas dobles '"' no deben estar 
+1.2) Crear la tabla de datos padron_txt con todos los campos del fichero CSV y cargar los datos mediante el 
+comando LOAD DATA LOCAL INPATH. La tabla tendrá formato texto y tendrá como delimitador de campo el caracter ';'
+y los campos que en el documento original están encerrados en comillas dobles '"' no deben estar 
 envueltos en estos caracteres en la tabla de Hive (es importante indicar esto 
 utilizando el serde de OpenCSV, si no la importación de las variables que hemos 
 indicado como numéricas fracasará ya que al estar envueltos en comillas los toma 
 como strings) y se deberá omitir la cabecera del fichero de datos al crear la tabla.
 ```
+CREATE EXTERNAL TABLE IF NOT EXISTS padron_txt (
+ cod_distrito INT,
+ desc_distrito STRING,
+ cod_dist_barrio INT,
+ desc_barrio STRING,
+ cod_barrio INT,
+ cod_dist_seccion INT,
+ cod_seccion INT,
+ cod_edad_int INT,
+ EspanolesHombres INT,
+ EspanolesMujeres INT,
+ ExtranjerosHombres INT,
+ ExtranjerosMujeres INT )
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES ('separatorChar' = '\073', 'quoteChar' = '"', "escapeChar" = '\')
+STORED AS TEXTFILE;
+
+LOAD DATA LOCAL INPATH "/mnt/hgfs/Rango_Edades_Seccion_202204.csv" INTO TABLE padron_txt;
 ```
 
 1.3) Hacer trim sobre los datos para eliminar los espacios innecesarios guardando la 
 tabla resultado como padron_txt_2. (Este apartado se puede hacer creando la tabla 
 con una sentencia CTAS.)
+_Nota: La función trim elimina los espacios innecesarios en los datos string_
 ```
+CREATE TABLE padron_txt_2 AS SELECT 
+ cod_distrito AS cod_distrito, 
+ trim(desc_distrito) AS desc_distrito, 
+ cod_dist_barrio AS cod_dist_barrio, 
+ trim(desc_barrio) AS desc_barrio, 
+ cod_barrio AS cod_barrio, 
+ cod_dist_seccion AS cod_dist_seccion, 
+ cod_seccion AS cod_seccion, 
+ cod_edad_int AS cod_edad_int, 
+ espanoleshombres AS espanoleshombres, 
+ espanolesmujeres AS espanolesmujeres, 
+ extranjeroshombres AS extranjeroshombres, 
+ extranjerosmujeres AS extranjerosmujeres 
+ FROM padron_txt;
+
 ```
 
 1.4) Investigar y entender la diferencia de incluir la palabra LOCAL en el comando LOAD 
