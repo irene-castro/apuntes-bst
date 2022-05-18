@@ -29,6 +29,8 @@ con una sentencia CTAS.)
 1.4) Investigar y entender la diferencia de incluir la palabra LOCAL en el comando LOAD 
 DATA.
 ```
+Al insertar datos en Hive, se pueden hacer de dos formas: por el sistema de archivos local, y por HDFS.
+Con LOCAL, lo que estamos haciendo es cargar datos de nuestro sistema local, y si no lo especificamos, entonces estaremos cargando en HDFS.
 ```
 
 1.5) En este momento te habrás dado cuenta de un aspecto importante, los datos nulos 
@@ -71,6 +73,7 @@ tabla ha sido creada con las regex de OpenCSV._
 
 2.1) ¿Qué es CTAS?
 ```
+CTAS: Create Table As Select. Es una forma de crear una tabla en Hive a partir de la sentencia SELECT de otra tabla.
 ```
 
 2.2) Crear tabla Hive padron_parquet (cuyos datos serán almacenados en el formato 
@@ -97,6 +100,17 @@ tabla padron_parquet_2 no los tenga. Dejo a tu elección cómo hacerlo.
 2.5) Investigar en qué consiste el formato columnar parquet y las ventajas de trabajar 
 con este tipo de formatos.
 ```
+En primer lugar, Apache Parquet es un formato de archivo diseñado para soportar el procesamiento rápido de datos complejos,
+con varias características notables. Entre ellas, está el del formato columnar: A diferencia de los formatos basados en filas,
+como CSV, Parquet está orientado a columnas, lo que significa que los valores de cada columna de la tabla se almacenan uno al 
+lado del otro, en lugar de los de cada registro. Es de código abierto. 
+
+Ventajas del almacenamiento columnar:
+- Compresión.
+- Rendimiento: Al ejecutar consultas en su sistema de archivos basado en Parquet, puede centrarse sólo en los datos 
+relevantes muy rápidamente.
+- Los usuarios pueden empezar con un esquema sencillo, e ir añadiendo gradualmente más columnas al esquema según sea necesario. 
+De esta manera, los usuarios pueden terminar con múltiples archivos Parquet con esquemas diferentes pero compatibles entre sí. 
 ```
 
 2.6) Comparar el tamaño de los ficheros de los datos de las tablas padron_txt (txt), 
@@ -112,10 +126,21 @@ location de cada tabla por ejemplo haciendo "show create table").
 
 3.1) ¿Qué es Impala?
 ```
+Es un motor SQL pensado para administrar y analizar sobre grandes volúmenes de datos almacenados en Hadoop. Su motor es MPP –procesamiento masivo en paralelo-. Latencias de milisegundos.
 ```
 
 3.2) ¿En qué se diferencia de Hive?
 ```
+- Impala no soporta ficheros con tipos de datos a medida. 
+- No soporta tipo de datos DATE 
+- Ni funciones XML y JSON, ni otras de agregación como percentile, percentile_approx,… 
+- No soporta sampling (ejecutar queries sobre un subconjunto de una tabla). 
+- Vistas laterales 
+- Múltiples cláusulas DISTINCT por query. 
+- Hive se basa en MapReduce, Impala no, pues implementa una arquitectura distribuida basada en procesos daemon. 
+- Hive materializa todos los resultados intermedios para mejorar la escalabilidad y tolerancia a fallos. Impala realiza
+streaming de resultados intermedios entre ejecutores. 
+- No admite tipos complejos
 ```
 
 3.3) Comando INVALIDATE METADATA, ¿en qué consiste?
