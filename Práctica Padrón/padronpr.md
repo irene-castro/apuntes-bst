@@ -37,7 +37,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS padron_txt (
  ExtranjerosMujeres INT )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES ('separatorChar' = '\073', 'quoteChar' = '"', "escapeChar" = '\')
-STORED AS TEXTFILE;
+STORED AS TEXTFILE TBLPROPERTIES ("skip.header.line.count"="1");;
 
 LOAD DATA LOCAL INPATH "/mnt/hgfs/Rango_Edades_Seccion_202204.csv" INTO TABLE padron_txt;
 ```
@@ -83,6 +83,31 @@ when para sustituir por 0 los espacios en blanco. (Pista: es útil darse cuenta 
 un espacio vacío es un campo con longitud 0). Haz esto solo para la tabla 
 padron_txt.
 ```
+- Primero, comprobamos si hay espacios en blanco en las variables numéricas correspondientes a las 4 últimas
+variables de nuestra tabla. Como un espacio vacío es un campo de longitud 0, podemos seleccionar las longitudes
+de las variables numéricas que nos atañen:
+
+SELECT length(espanoleshombres), length(espanolesmujeres), length(extranjeroshombres), length(extranjerosmujeres) FROM padron_txt
+
+- Ahora creamos la tabla nueva:
+
+ALTER TABLE padron_txt RENAME TO padron_vieja
+
+- Finalmente, sustituímos los espacios en blanco por 0 haciendo uso de la sentencia CASE WHEN
+
+CREATE TABLE padron_txt AS SELECT cod_distrito, 
+                                  desc_distrito,
+                                  cod_dist_barrio,
+                                  desc_barrio,
+                                  cod_dist_seccion,
+                                  cod_seccion,
+                                  cod_edad_int, 
+                                  CASE WHEN length(espanoleshombres)=0 then 0 ELSE espanoleshombres END AS espanoleshombres,
+                                  CASE WHEN length(espanolesmujeres)=0 then 0 ELSE espanolesmujeres END AS espanolesmujeres,
+                                  CASE WHEN length(extranjeroshombres)=0 then 0 ELSE extranjeroshombres END AS extranjeroshombres,
+                                  CASE WHEN length(extranjerosmujeres)=0 then 0 ELSE extranjerosmujeres END AS extranjerosmujeres,
+FROM padron_vieja
+                              
 ```
 
 1.6) Una manera tremendamente potente de solucionar todos los problemas previos 
@@ -98,6 +123,25 @@ nuestro CSV de entrada. Para ello puede ser útil el portal "regex101". Utiliza 
 para crear de nuevo la tabla padron_txt_2.
 
 ```
+CREATE EXTERNAL TABLE IF NOT EXISTS padron_txt_2 (
+ cod_distrito INT,
+ desc_distrito STRING,
+ cod_dist_barrio INT,
+ desc_barrio STRING,
+ cod_barrio INT,
+ cod_dist_seccion INT,
+ cod_seccion INT,
+ cod_edad_int INT,
+ EspanolesHombres INT,
+ EspanolesMujeres INT,
+ ExtranjerosHombres INT,
+ ExtranjerosMujeres INT )
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+WITH SERDEPROPERTIES ('input.regex'='XXXXXXX')
+STORED AS TEXTFILE TBLPROPERTIES ("skip.header.line.count"="1");
+
+LOAD DATA LOCAL INPATH "/mnt/hgfs/Rango_Edades_Seccion_202204.csv" INTO TABLE padron_txt_2;
+
 ```
 
 
@@ -117,6 +161,7 @@ CTAS: Create Table As Select. Es una forma de crear una tabla en Hive a partir d
 2.2) Crear tabla Hive padron_parquet (cuyos datos serán almacenados en el formato 
 columnar parquet) a través de la tabla padron_txt mediante un CTAS
 ```
+CREATE TABLE padron_parquet STORED AS PARQUET AS SELECT * FROM padron_txt;
 ```
 
 2.3) Crear tabla Hive padron_parquet_2 a través de la tabla padron_txt_2 mediante un 
@@ -125,6 +170,7 @@ padron_txt_2, la primera con espacios innecesarios y la segunda sin espacios
 innecesarios) y otras dos tablas en formato parquet (padron_parquet y 
 padron_parquet_2, la primera con espacios y la segunda sin ellos).
 ```
+CREATE TABLE padron_parquet_2 STORED AS PARQUET AS SELECT * FROM padron_txt_2;
 ```
 
 2.4) Opcionalmente también se pueden crear las tablas directamente desde 0 (en lugar 
@@ -192,21 +238,72 @@ incrementalmente el metadata.
 
 3.4)  Hacer invalidate metadata en Impala de la base de datos datos_padron
 ```
+INVALIDATE METADATA datos_padron
 ```
 
 3.5) Calcular el total de EspanolesHombres, espanolesMujeres, ExtranjerosHombres y 
 ExtranjerosMujeres agrupado por DESC_DISTRITO y DESC_BARRIO.
 ```
+SELECT count(espanoleshombres), 
+       count(espanolesmujeres), 
+       count(extranjeroshombres), 
+       count(extranjerosmujeres),
+       desc_distrito,
+       desc_barrio
+FROM padron_txt
+GROUP BY desc_distrito, desc_barrio
 ```
 
 3.6)  Llevar a cabo las consultas en Hive en las tablas padron_txt_2 y padron_parquet_2 
 (No deberían incluir espacios innecesarios). ¿Alguna conclusión?
 ```
+SELECT count(espanoleshombres), 
+       count(espanolesmujeres), 
+       count(extranjeroshombres), 
+       count(extranjerosmujeres),
+       desc_distrito,
+       desc_barrio
+FROM padron_txt_2
+GROUP BY desc_distrito, desc_barrio
+
+
+SELECT count(espanoleshombres), 
+       count(espanolesmujeres), 
+       count(extranjeroshombres), 
+       count(extranjerosmujeres),
+       desc_distrito,
+       desc_barrio
+FROM padron_parquet_2
+GROUP BY desc_distrito, desc_barrio
+
+Conclusión: 
+
 ```
 
 3.7) Llevar a cabo la misma consulta sobre las mismas tablas en Impala. ¿Alguna 
 conclusión?
 ```
+SELECT count(espanoleshombres), 
+       count(espanolesmujeres), 
+       count(extranjeroshombres), 
+       count(extranjerosmujeres),
+       desc_distrito,
+       desc_barrio
+FROM padron_txt_2
+GROUP BY desc_distrito, desc_barrio
+
+
+SELECT count(espanoleshombres), 
+       count(espanolesmujeres), 
+       count(extranjeroshombres), 
+       count(extranjerosmujeres),
+       desc_distrito,
+       desc_barrio
+FROM padron_parquet_2
+GROUP BY desc_distrito, desc_barrio
+
+Conclusión:
+
 ```
 
 3.8) ¿Se percibe alguna diferencia de rendimiento entre Hive e Impala?
@@ -220,6 +317,20 @@ Impala es hasta 5 veces más rapido que Hive, tiene una latencia mucho menor.
 4.1) Crear tabla (Hive) padron_particionado particionada por campos DESC_DISTRITO y 
 DESC_BARRIO cuyos datos estén en formato parquet.
 ```
+CREATE TABLE padron_particionado ( cod_distrito INT,
+                                   desc_distrito STRING,
+                                   cod_barrio INT,
+                                   desc_barrio STRING, 
+                                   cod_barrio INT,
+                                   cod_dist_seccion INT,
+                                   cod_seccion INT,
+                                   cod_edad_int INT,
+                                   espanoleshombres INT,
+                                   espanolesmujeres INT,
+                                   extranjeroshombres INT,
+                                   extranjerosmujeres INT)
+PARTITIONED BY (desc_distrito, desc_barrio)                                  
+                                   
 ```
 
 4.2)  Insertar datos (en cada partición) dinámicamente (con Hive) en la tabla recién 
