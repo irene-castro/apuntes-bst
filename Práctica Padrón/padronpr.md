@@ -145,6 +145,11 @@ streaming de resultados intermedios entre ejecutores.
 
 3.3) Comando INVALIDATE METADATA, ¿en qué consiste?
 ```
+Hace que los metadatos de la base de datos/tabla especificada queden obsoletos, de forma que aplicado ese comando,
+si Impala quiere ejecutar una consulta en la tabla cuyo metadata está invalidado, Impala recarga el 
+metadata asociado antes de que se realice la consulta. Es una operación muy costosa comparada con REFRESH, que actualiza 
+incrementalmente el metadata.
+
 ```
 
 3.4)  Hacer invalidate metadata en Impala de la base de datos datos_padron
