@@ -58,10 +58,10 @@ CREATE TABLE padron_txt_2 AS SELECT
  cod_dist_seccion AS cod_dist_seccion, 
  cod_seccion AS cod_seccion, 
  cod_edad_int AS cod_edad_int, 
- espanoleshombres AS espanoleshombres, 
- espanolesmujeres AS espanolesmujeres, 
- extranjeroshombres AS extranjeroshombres, 
- extranjerosmujeres AS extranjerosmujeres 
+ EspanolesHombres AS espanoleshombres, 
+ EspanolesMujeres AS espanolesmujeres, 
+ ExtranjerosHombres AS extranjeroshombres, 
+ ExtranjerosMujeres AS extranjerosmujeres 
  FROM padron_txt;
 
 ```
@@ -90,11 +90,13 @@ padron_txt.
 variables de nuestra tabla. Como un espacio vacío es un campo de longitud 0, podemos seleccionar las longitudes
 de las variables numéricas que nos atañen:
 
-SELECT length(espanoleshombres), length(espanolesmujeres), length(extranjeroshombres), length(extranjerosmujeres) FROM padron_txt
+SELECT length(EspanolesHombres), length(EspanolesMujeres), length(ExtranjerosHombres), length(ExtranjerosMujeres) FROM padron_txt
+
+-Vemos que, por ejemplo, en la columna de ExtranjerosHombres (primera fila) nos aparece el campo de longitud 0.
 
 - Ahora creamos la tabla nueva:
 
-ALTER TABLE padron_txt RENAME TO padron_vieja
+ALTER TABLE padron_txt RENAME TO padron_viej
 
 - Finalmente, sustituímos los espacios en blanco por 0 haciendo uso de la sentencia CASE WHEN
 
@@ -105,11 +107,12 @@ CREATE TABLE padron_txt AS SELECT cod_distrito,
                                   cod_dist_seccion,
                                   cod_seccion,
                                   cod_edad_int, 
-                                  CASE WHEN length(espanoleshombres)=0 then 0 ELSE espanoleshombres END AS espanoleshombres,
-                                  CASE WHEN length(espanolesmujeres)=0 then 0 ELSE espanolesmujeres END AS espanolesmujeres,
-                                  CASE WHEN length(extranjeroshombres)=0 then 0 ELSE extranjeroshombres END AS extranjeroshombres,
-                                  CASE WHEN length(extranjerosmujeres)=0 then 0 ELSE extranjerosmujeres END AS extranjerosmujeres,
-FROM padron_vieja
+                                  CASE WHEN length(EspanolesHombres)=0 then 0 ELSE EspanolesHombres END AS espanoleshombres,
+                                  CASE WHEN length(EspanolesMujeres)=0 then 0 ELSE EspanolesMujeres END AS espanolesmujeres,
+                                  CASE WHEN length(ExtranjerosHombres)=0 then 0 ELSE ExtranjerosHombres END AS extranjeroshombres,
+                                  CASE WHEN length(ExtranjerosMujeres)=0 then 0 ELSE ExtranjerosMujeres END AS extranjerosmujeres
+FROM padron_viej
+
                               
 ```
 
@@ -140,10 +143,11 @@ CREATE EXTERNAL TABLE IF NOT EXISTS padron_txt_2 (
  ExtranjerosHombres INT,
  ExtranjerosMujeres INT )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
-WITH SERDEPROPERTIES ('input.regex'='XXXXXXX')
+WITH SERDEPROPERTIES ('input.regex'='"(.*)"\073"([A-Za-z]*) *"\073"(.*)"\073"([A-Za-z]*) *"\073"(.*)
+"\073"(.*?)"\073"(.*?)"\073"(.*?)"\073"(.*?)"(.*?)"\073"(.*?)"\073"(.*?)"')
 STORED AS TEXTFILE TBLPROPERTIES ("skip.header.line.count"="1");
 
-LOAD DATA LOCAL INPATH "/mnt/hgfs/Rango_Edades_Seccion_202204.csv" INTO TABLE padron_txt_2;
+LOAD DATA LOCAL INPATH "/user/hive/warehouse/padron_txt/Rango_Edades_Seccion_202205.csv" INTO TABLE padron_txt_2;
 
 ```
 
