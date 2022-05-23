@@ -4,7 +4,7 @@ A partir de los datos (CSV) de Padrón de Madrid llevamos acabo los siguientes e
 
 ## _Hive_ ##
 
-_Nota: Para abrir Hive, iniciamos la máquina virtual de Cloudera. Una vez hecho, abrimos Hue en el navegador, en el cual ya 
+> _Nota: Para abrir Hive, iniciamos la máquina virtual de Cloudera. Una vez hecho, abrimos Hue en el navegador, en el cual ya 
 podremos iniciar la consulta Hive que queramos._
 
 ## 1. Creación de tablas en formato texto ##
@@ -42,12 +42,12 @@ STORED AS TEXTFILE TBLPROPERTIES ("skip.header.line.count"="1");
 LOAD DATA INPATH "/user/hive/warehouse/datos_padron.db/padron_txt/Rango_Edades_Seccion_202204.csv" INTO TABLE padron_txt;
 
 ```
-_Nota: Usé LOAD DATA INPATH porque el LOAD DATA LOCAL INPATH con la ruta mnt/hgfs no funcionaba, no tengo ni idea de por qué._
+> _Nota: Usé LOAD DATA INPATH porque el LOAD DATA LOCAL INPATH con la ruta mnt/hgfs no funcionaba, no tengo ni idea de por qué._
 
 1.3) Hacer trim sobre los datos para eliminar los espacios innecesarios guardando la 
 tabla resultado como padron_txt_2. (Este apartado se puede hacer creando la tabla 
 con una sentencia CTAS.)
-_Nota: La función trim elimina los espacios innecesarios en los datos string_
+> _Nota: La función trim elimina los espacios innecesarios en los datos string_
 ```
 CREATE TABLE padron_txt_2 AS SELECT 
  cod_distrito AS cod_distrito, 
@@ -65,7 +65,7 @@ CREATE TABLE padron_txt_2 AS SELECT
  FROM padron_txt;
 
 ```
-_Nota: Tarda muchísimo tiempo._
+> _Nota: Tarda muchísimo tiempo._
 
 1.4) Investigar y entender la diferencia de incluir la palabra LOCAL en el comando LOAD 
 DATA.
@@ -209,6 +209,10 @@ padron_txt_2 (txt pero no incluye los espacios innecesarios), padron_parquet y
 padron_parquet_2 (alojados en hdfs cuya ruta se puede obtener de la propiedad 
 location de cada tabla por ejemplo haciendo "show create table").
 ```
+- totalSize padron_txt: 15.73 MB
+- totalSize padron_txt_2: 33.21 MB
+- totalSize padron_parquet: 912.34 KB
+- totalSize padron_parquet_2: 23.22 MB
 ```
 
 ## _Impala_ ##
@@ -370,7 +374,7 @@ SELECT
  desc_barrio;
  
 ```
-_Nota: Me sale un error rarísimo_
+>_Nota: Me sale un error rarísimo_
 
 
 4.3) Hacer invalidate metadata en Impala de la base de datos padron_particionado
