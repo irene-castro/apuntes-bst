@@ -354,7 +354,7 @@ SET hive.exec.max.dynamic.partitions.pernode=10000;
 - Después insertamos los datos de la forma que sigue
 
 FROM datos_padron.padron_parquet_2 INSERT OVERWRITE TABLE
-datos_padron.padron_particionado (desc_distrito, desc_barrio)
+datos_padron.padron_particionado partition (desc_distrito, desc_barrio)
 SELECT 
  CAST(cod_distrito AS INT),
  CAST(cod_dist_barrio AS INT),
@@ -370,6 +370,7 @@ SELECT
  desc_barrio;
  
 ```
+_Nota: Me sale un error rarísimo_
 
 
 4.3) Hacer invalidate metadata en Impala de la base de datos padron_particionado
