@@ -245,6 +245,7 @@ incrementalmente el metadata.
 
 3.4)  Hacer invalidate metadata en Impala de la base de datos datos_padron
 ```
+- Si ejecuto el siguiente comando me da error porque no es una tabla. ¿Se puede aplicar a bases de datos?
 INVALIDATE METADATA datos_padron
 ```
 
