@@ -252,10 +252,10 @@ INVALIDATE METADATA datos_padron
 3.5) Calcular el total de EspanolesHombres, espanolesMujeres, ExtranjerosHombres y 
 ExtranjerosMujeres agrupado por DESC_DISTRITO y DESC_BARRIO.
 ```
-SELECT count(espanoleshombres), 
-       count(espanolesmujeres), 
-       count(extranjeroshombres), 
-       count(extranjerosmujeres),
+SELECT count(espanoleshombres) AS num_espanoleshombres, 
+       count(espanolesmujeres) AS num_espanolesmujeres, 
+       count(extranjeroshombres) AS num_extranjeroshombres, 
+       count(extranjerosmujeres) AS num_extranjerosmujeres,
        desc_distrito,
        desc_barrio
 FROM padron_txt
@@ -265,26 +265,26 @@ GROUP BY desc_distrito, desc_barrio
 3.6)  Llevar a cabo las consultas en Hive en las tablas padron_txt_2 y padron_parquet_2 
 (No deberían incluir espacios innecesarios). ¿Alguna conclusión?
 ```
-SELECT count(espanoleshombres), 
-       count(espanolesmujeres), 
-       count(extranjeroshombres), 
-       count(extranjerosmujeres),
+SELECT count(espanoleshombres) AS num_espanoleshombres, 
+       count(espanolesmujeres) AS num_espanolesmujeres, 
+       count(extranjeroshombres) AS num_extranjeroshombres, 
+       count(extranjerosmujeres) AS num_extranjerosmujeres,
        desc_distrito,
        desc_barrio
 FROM padron_txt_2
 GROUP BY desc_distrito, desc_barrio
 
 
-SELECT count(espanoleshombres), 
-       count(espanolesmujeres), 
-       count(extranjeroshombres), 
-       count(extranjerosmujeres),
+SELECT count(espanoleshombres) AS num_espanoleshombres, 
+       count(espanolesmujeres) AS num_espanolesmujeres, 
+       count(extranjeroshombres) AS num_extranjeroshombres, 
+       count(extranjerosmujeres) AS num_extranjerosmujeres,
        desc_distrito,
        desc_barrio
 FROM padron_parquet_2
 GROUP BY desc_distrito, desc_barrio
 
-Conclusión: 
+Conclusión: Es lo mismo.
 
 ```
 
@@ -310,7 +310,7 @@ SELECT count(espanoleshombres),
 FROM padron_parquet_2
 GROUP BY desc_distrito, desc_barrio
 
-Conclusión:
+Conclusión: La consulta de padron_parquet_2 es más rápida.
 
 ```
 
@@ -344,6 +344,8 @@ PARTITIONED BY (desc_distrito, desc_barrio)
 4.2)  Insertar datos (en cada partición) dinámicamente (con Hive) en la tabla recién 
 creada a partir de un select de la tabla padron_parquet_2
 ```
+
+
 ```
 
 4.3) Hacer invalidate metadata en Impala de la base de datos padron_particionado
