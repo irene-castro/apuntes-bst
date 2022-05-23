@@ -36,11 +36,13 @@ CREATE EXTERNAL TABLE IF NOT EXISTS padron_txt (
  ExtranjerosHombres INT,
  ExtranjerosMujeres INT )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
-WITH SERDEPROPERTIES ('separatorChar' = '\073', 'quoteChar' = '"', "escapeChar" = '\')
-STORED AS TEXTFILE TBLPROPERTIES ("skip.header.line.count"="1");;
+WITH SERDEPROPERTIES ('separatorChar' = '\073', 'quoteChar' = '"',)
+STORED AS TEXTFILE TBLPROPERTIES ("skip.header.line.count"="1");
 
-LOAD DATA LOCAL INPATH "/mnt/hgfs/Rango_Edades_Seccion_202204.csv" INTO TABLE padron_txt;
+LOAD DATA INPATH "/user/hive/warehouse/datos_padron.db/padron_txt/Rango_Edades_Seccion_202204.csv" INTO TABLE padron_txt;
+
 ```
+_Nota: Usé LOAD DATA INPATH porque el LOAD DATA LOCAL INPATH con la ruta mnt/hgfs no funcionaba, no tengo ni idea de por qué._
 
 1.3) Hacer trim sobre los datos para eliminar los espacios innecesarios guardando la 
 tabla resultado como padron_txt_2. (Este apartado se puede hacer creando la tabla 
@@ -63,6 +65,7 @@ CREATE TABLE padron_txt_2 AS SELECT
  FROM padron_txt;
 
 ```
+_Nota: Tarda muchísimo tiempo._
 
 1.4) Investigar y entender la diferencia de incluir la palabra LOCAL en el comando LOAD 
 DATA.
