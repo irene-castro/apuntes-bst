@@ -326,9 +326,7 @@ Impala es hasta 5 veces más rapido que Hive, tiene una latencia mucho menor.
 DESC_BARRIO cuyos datos estén en formato parquet.
 ```
 CREATE TABLE padron_particionado ( cod_distrito INT,
-                                   desc_distrito STRING,
-                                   cod_barrio INT,
-                                   desc_barrio STRING, 
+                                   cod_dist_barrio INT,
                                    cod_barrio INT,
                                    cod_dist_seccion INT,
                                    cod_seccion INT,
@@ -337,19 +335,46 @@ CREATE TABLE padron_particionado ( cod_distrito INT,
                                    espanolesmujeres INT,
                                    extranjeroshombres INT,
                                    extranjerosmujeres INT)
-PARTITIONED BY (desc_distrito, desc_barrio)                                  
+PARTITIONED BY (desc_distrito STRING, desc_barrio STRING)   
+STORED AS parquet
                                    
 ```
 
 4.2)  Insertar datos (en cada partición) dinámicamente (con Hive) en la tabla recién 
 creada a partir de un select de la tabla padron_parquet_2
 ```
+- Primeramente, tenemos que configurar los parámetros relacionados con la partición dinámica.
+Los de uso común suelen ser los siguientes: 
 
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstrict;
+SET hive.exec.max.dynamic.partitions=10000;
+SET hive.exec.max.dynamic.partitions.pernode=10000;
 
+- Después insertamos los datos de la forma que sigue
+
+FROM datos_padron.padron_parquet_2 INSERT OVERWRITE TABLE
+datos_padron.padron_particionado (desc_distrito, desc_barrio)
+SELECT 
+ CAST(cod_distrito AS INT),
+ CAST(cod_dist_barrio AS INT),
+ CAST(cod_barrio AS INT),
+ CAST(cod_dist_seccion AS INT),
+ CAST(cod_seccion AS INT),
+ CAST(cod_edad_int AS INT),
+ CAST(espanoleshombres AS INT),
+ CAST(espanolesmujeres AS INT),
+ CAST(extranjeroshombres AS INT),
+ CAST(extranjerosmujeres AS INT),
+ desc_distrito,
+ desc_barrio;
+ 
 ```
+
 
 4.3) Hacer invalidate metadata en Impala de la base de datos padron_particionado
 ```
+INVALIDATE METADATA datos_padron.padron_particionado
 ```
 
 4.4) Calcular el total de EspanolesHombres, EspanolesMujeres, ExtranjerosHombres y 
