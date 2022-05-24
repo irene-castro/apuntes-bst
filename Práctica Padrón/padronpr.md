@@ -374,7 +374,8 @@ SELECT
  desc_barrio;
  
 ```
->_Nota: Me sale un error rarísimo_
+>_Nota: Me sale un error rarísimo, pero me carga los datos en la tabla igualmente,
+> PERO todas las columnas en formato STRING_
 
 
 4.3) Hacer invalidate metadata en Impala de la base de datos padron_particionado
@@ -386,23 +387,89 @@ INVALIDATE METADATA datos_padron.padron_particionado
 ExtranjerosMujeres agrupado por DESC_DISTRITO y DESC_BARRIO para los distritos 
 CENTRO, LATINA, CHAMARTIN, TETUAN, VICALVARO y BARAJAS.
 ```
+SELECT count(espanoleshombres) AS numespanoleshombres,
+       count(espanolesmujeres) AS numespanolesmujeres,
+       count(extranjeroshombres) AS numextranjeroshombres,
+       count(extranjerosmujeres) AS numextranjerosmujeres,
+       desc_distrito,
+       desc_barrio
+FROM padron_txt_2
+WHERE desc_distrito IN ("CENTRO","LATINA","CHAMARTIN","TETUAN","VICALVARO","BARAJAS")
+GROUP BY desc_distrito, desc_barrio
 ```
 
 4.5) Llevar a cabo la consulta en Hive en las tablas padron_parquet y 
-padron_partitionado. ¿Alguna conclusión?
+padron_particionado. ¿Alguna conclusión?
 ```
+La sintaxis viene siendo la misma, entonces:
+    - Haciendo la consulta en padron_parquet tarda 35s y devuelve 0 resultados.
+    - Haciendo la consulta en padron_particionado 26s y sí devuelve resultados.
+Es evidente que, gracias a las particiones, se ejecuta mucho más rápido.
 ```
 
 4.6) Llevar a cabo la consulta en Impala en las tablas padron_parquet y 
 padron_particionado. ¿Alguna conclusión?
 ```
+Igual que antes, la sintaxis sigue siendo la misma, entonces como conclusión:
+    - Haciendo la consulta en padron_parquet tarda 1s y devuelve 0 resultados.
+    - Haciendo la consulta en padron_particionado tarda 6s y devuelve resultados.
 ```
 
 4.7) Hacer consultas de agregación (Max, Min, Avg, Count) tal cual el ejemplo anterior 
 con las 3 tablas (padron_txt_2, padron_parquet_2 y padron_particionado) y 
 comparar rendimientos tanto en Hive como en Impala y sacar conclusiones.
 ```
+- En Hive:
+
+SELECT count(espanoleshombres) AS numespanoleshombres,
+       count(espanolesmujeres) AS numespanolesmujeres,
+       count(extranjeroshombres) AS numextranjeroshombres,
+       count(extranjerosmujeres) AS numextranjerosmujeres,
+       max(espanoleshombres) AS maxespanoleshombres,
+       avg(extranjerosmujeres) AS mediaextranjerosmujeres
+       desc_distrito,
+       desc_barrio
+FROM padron_txt_2
+WHERE desc_distrito IN ("CENTRO","LATINA","CHAMARTIN","TETUAN","VICALVARO","BARAJAS")
+GROUP BY desc_distrito, desc_barrio
+
+> 26.63s de ejecución.
+
+SELECT count(espanoleshombres) AS numespanoleshombres,
+       count(espanolesmujeres) AS numespanolesmujeres,
+       count(extranjeroshombres) AS numextranjeroshombres,
+       count(extranjerosmujeres) AS numextranjerosmujeres,
+       max(espanoleshombres) AS maxespanoleshombres,
+       avg(extranjerosmujeres) AS mediaextranjerosmujeres
+       desc_distrito,
+       desc_barrio
+FROM padron_parquet_2
+WHERE desc_distrito IN ("CENTRO","LATINA","CHAMARTIN","TETUAN","VICALVARO","BARAJAS")
+GROUP BY desc_distrito, desc_barrio
+
+> 27.14s de ejecución.
+
+SELECT count(espanoleshombres) AS numespanoleshombres,
+       count(espanolesmujeres) AS numespanolesmujeres,
+       count(extranjeroshombres) AS numextranjeroshombres,
+       count(extranjerosmujeres) AS numextranjerosmujeres,
+       max(espanoleshombres) AS maxespanoleshombres,
+       avg(extranjerosmujeres) AS mediaextranjerosmujeres
+       desc_distrito,
+       desc_barrio
+FROM padron_particionado
+WHERE desc_distrito IN ("CENTRO","LATINA","CHAMARTIN","TETUAN","VICALVARO","BARAJAS")
+GROUP BY desc_distrito, desc_barrio
+
+> 26.73s de ejecución.
+
+- En Impala: Ejecución muchísimo más rápida.
+
 ```
+
+
+## _HDFS_ ##
+
 
 
 
