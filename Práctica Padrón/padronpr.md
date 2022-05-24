@@ -494,11 +494,17 @@ Manager). A su vez, en las máquinas Cloudera es posible (dependiendo de si
 usamos Hive desde consola o desde Hue) que no tengamos permisos para crear 
 directorios en HDFS salvo en el directorio /user/cloudera.
 ```
+hadoop fs -mkdir /test
 ```
 
 5.4) Mueve tu fichero datos1 al directorio que has creado en HDFS con un comando 
 desde consola.
 ```
+hdfs dfs -copyFromLocal /home/cloudera/Desktop/datos1.txt /test
+
+-Vemos que se funciona listando el contenido de /test:
+hdfs dfs -ls /test
+
 ```
 
 5.5) Desde Hive, crea una nueva database por ejemplo con el nombre numeros. Crea 
@@ -506,6 +512,14 @@ una tabla que no sea externa y sin argumento location con tres columnas
 numéricas, campos separados por coma y delimitada por filas. La llamaremos por 
 ejemplo numeros_tbl.
 ```
+CREATE DATABASE numeros
+USE numeros
+
+CREATE TABLE IF NOT EXISTS numeros_tbl
+(n1 INT, n2 INT, n3 INT)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
 ```
 
 5.6) Carga los datos de nuestro fichero de texto datos1 almacenado en HDFS en la tabla 
@@ -513,17 +527,35 @@ de Hive. Consulta la localización donde estaban anteriormente los datos
 almacenados. ¿Siguen estando ahí? ¿Dónde están?. Borra la tabla, ¿qué ocurre con 
 los datos almacenados en HDFS?
 ```
+LOAD DATA INPATH "/test/datos1.txt" INTO TABLE numeros_tbl;
+
+- En la consola, listamos la carpeta /test y ahora no hay nada. Esto pasa porque
+se trasladaron a /user/hive/warehouse.
+
+DROP TABLE IF EXISTS numeros_tbl;
+- Si ahora borro la tabla, ya no estará tampoco en /user/hive/warehouse.
 ```
 
 5.7) Vuelve a mover el fichero de texto datos1 desde el almacenamiento local al 
 directorio anterior en HDFS.
 ```
+hdfs dfs -copyFromLocal /home/cloudera/Desktop/datos1.txt /test
 ```
 
 5.8) Desde Hive, crea una tabla externa sin el argumento location. Y carga datos1 (desde 
 HDFS) en ella. ¿A dónde han ido los datos en HDFS? Borra la tabla ¿Qué ocurre con 
 los datos en hdfs?
 ```
+CREATE EXTERNAL TABLE IF NOT EXISTS numeros_tbl2
+(n1 INT, n2 INT, n3 INT)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+LOAD DATA INPATH "/test/datos1.txt" INTO TABLE numeros_tbl2;
+
+-Los datos ya NO están en HDFS pero sí en el warehouse de hive.
+Al borrar la tabla, los datos siguen estando en el warehouse.
+
 ```
 
 5.9) Borra el fichero datos1 del directorio en el que estén. Vuelve a insertarlos en el 
@@ -533,12 +565,28 @@ referencia al directorio donde los hayas situado en HDFS (/test). No cargues los
 datos de ninguna manera explícita. Haz una consulta sobre la tabla que acabamos 
 de crear que muestre todos los registros. ¿Tiene algún contenido?
 ```
+hdfs dfs -rm /user/hive/warehouse/numeros.db/numeros_tbl2/datos1.txt
+hdfs dfs -copyFromLocal /home/cloudera/Desktop/datos1.txt /test
+
+CREATE EXTERNAL TABLE IF NOT EXISTS numeros_tbl3
+(n1 INT, n2 INT, n3 INT)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+LOCATION "/test";
+
+SELECT * FROM numeros_tbl3;
+
+- Efectivamente tiene contenido, los números de datos1 repartidos en 3 columnas y 3 filas.
+
 ```
 
 5.10) Inserta el fichero de datos creado al principio, "datos2" en el mismo directorio de 
 HDFS que "datos1". Vuelve a hacer la consulta anterior sobre la misma tabla. ¿Qué 
 salida muestra? 
 ```
+hdfs dfs -copyFromLocal /home/cloudera/Desktop/datos2.txt /test
+
+- La salida mostrada ahora es la misma de antes pero añadiendo los números de datos2.
 ```
 
 5.11) Extrae conclusiones de todos estos anteriores apartados.
