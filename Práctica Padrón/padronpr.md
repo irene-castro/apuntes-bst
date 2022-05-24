@@ -470,6 +470,82 @@ GROUP BY desc_distrito, desc_barrio
 
 ## _HDFS_ ##
 
+A continuación vamos a hacer una inspección de las tablas, tanto externas (no 
+gestionadas) como internas (gestionadas). Este apartado se hará si se tiene acceso y conocimiento previo sobre cómo insertar datos en HDFS.
+
+5.1) Crear un documento de texto en el almacenamiento local que contenga una 
+secuencia de números distribuidos en filas y separados por columnas, llámalo 
+datos1 y que sea por ejemplo:
+1,2,3
+4,5,6
+7,8,9
+
+```
+```
+
+5.2) Crear un segundo documento (datos2) con otros números pero la misma estructura.
+```
+```
+
+5.3) Crear un directorio en HDFS con un nombre a placer, por ejemplo, /test. Si estás en 
+una máquina Cloudera tienes que asegurarte de que el servicio HDFS está activo ya 
+que puede no iniciarse al encender la máquina (puedes hacerlo desde el Cloudera 
+Manager). A su vez, en las máquinas Cloudera es posible (dependiendo de si 
+usamos Hive desde consola o desde Hue) que no tengamos permisos para crear 
+directorios en HDFS salvo en el directorio /user/cloudera.
+```
+```
+
+5.4) Mueve tu fichero datos1 al directorio que has creado en HDFS con un comando 
+desde consola.
+```
+```
+
+5.5) Desde Hive, crea una nueva database por ejemplo con el nombre numeros. Crea 
+una tabla que no sea externa y sin argumento location con tres columnas 
+numéricas, campos separados por coma y delimitada por filas. La llamaremos por 
+ejemplo numeros_tbl.
+```
+```
+
+5.6) Carga los datos de nuestro fichero de texto datos1 almacenado en HDFS en la tabla 
+de Hive. Consulta la localización donde estaban anteriormente los datos 
+almacenados. ¿Siguen estando ahí? ¿Dónde están?. Borra la tabla, ¿qué ocurre con 
+los datos almacenados en HDFS?
+```
+```
+
+5.7) Vuelve a mover el fichero de texto datos1 desde el almacenamiento local al 
+directorio anterior en HDFS.
+```
+```
+
+5.8) Desde Hive, crea una tabla externa sin el argumento location. Y carga datos1 (desde 
+HDFS) en ella. ¿A dónde han ido los datos en HDFS? Borra la tabla ¿Qué ocurre con 
+los datos en hdfs?
+```
+```
+
+5.9) Borra el fichero datos1 del directorio en el que estén. Vuelve a insertarlos en el 
+directorio que creamos inicialmente (/test). Vuelve a crear la tabla numeros desde 
+hive pero ahora de manera externa y con un argumento location que haga 
+referencia al directorio donde los hayas situado en HDFS (/test). No cargues los 
+datos de ninguna manera explícita. Haz una consulta sobre la tabla que acabamos 
+de crear que muestre todos los registros. ¿Tiene algún contenido?
+```
+```
+
+5.10) Inserta el fichero de datos creado al principio, "datos2" en el mismo directorio de 
+HDFS que "datos1". Vuelve a hacer la consulta anterior sobre la misma tabla. ¿Qué 
+salida muestra? 
+```
+```
+
+5.11) Extrae conclusiones de todos estos anteriores apartados.
+```
+```
+
+
 
 
 
